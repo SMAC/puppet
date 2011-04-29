@@ -60,6 +60,11 @@ Puppet::Type.type(:package).provide :pip,
   # gives the fully-qualified URL to the repository.
   def install
     args = %w{install -q}
+    
+    if @resource[:virtualenv]
+      args << "--environment" << @resource[:virtualenv]
+    end
+    
     if @resource[:source]
       args << "-e"
       if String === @resource[:ensure]
