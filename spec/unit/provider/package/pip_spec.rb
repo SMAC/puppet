@@ -149,6 +149,14 @@ describe provider_class do
         with('uninstall', '-y', '-q', 'sdsfdssdhdfyjymdgfcjdfjxdrssf')
       @provider.uninstall
     end
+    
+    it "should install from a virtualenv" do
+      @resource[:name] = "sdsfdssdhdfyjymdgfcjdfjxdrssf"
+      @resource[:virtualenv] = "/path/to/virtualenv"
+      @provider.expects(:lazy_pip).
+        with('uninstall', '-y', '-q', '--environment=/path/to/virtualenv', 'sdsfdssdhdfyjymdgfcjdfjxdrssf')
+      @provider.uninstall
+    end
 
   end
 

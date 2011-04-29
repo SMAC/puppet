@@ -23,16 +23,16 @@ Puppet::Type.type(:package).provide :pip,
 
   # Return an array of structured information about every installed package
   # that's managed by `pip` or an empty array if `pip` is not available.
-  def self.instances
-    if @resource[:virtualenv]
-      env = "--environment=#{@resource[:virtualenv]}"
+  def self.instances(virtualenv=nil)
+    if virtualenv
+      venv = "--environment=#{virtualenv}"
     else
-      env = ""
+      venv = ""
     end
     
     packages = []
     pip_cmd = which('pip') or return []
-    execpipe "#{pip_cmd} freeze #{env}" do |process|
+    execpipe "#{pip_cmd} freeze #{venv}" do |process|
       process.collect do |line|
         next unless options = parse(line)
         packages << new(options)
@@ -44,8 +44,12 @@ Puppet::Type.type(:package).provide :pip,
   # Return structured information about a particular package or `nil` if
   # it is not installed or `pip` itself is not available.
   def query
-    self.class.instances.each do |provider_pip|
-      return provider_pip.properties if @resource[:name] == provider_pip.name
+    # Lowercase comparison of python packages (pip treats them as equivalent
+    # anyway)
+    name = @resource[:name].downcase
+    
+    self.class.instances(@resource[:virtualenv]).each do |provider_pip|
+      return provider_pip.properties if name == provider_pip.name.downcase
     end
     return nil
   end
@@ -65,7 +69,7 @@ Puppet::Type.type(:package).provide :pip,
   # parameter, an SCM revision.  In that case, the source parameter
   # gives the fully-qualified URL to the repository.
   def install
-    args = %w{install -v}
+    args = %w{install -q}
     
     if @resource[:virtualenv]
       args << "--environment=#{@resource[:virtualenv]}"
@@ -97,12 +101,12 @@ Puppet::Type.type(:package).provide :pip,
   # <http://bugs.debian.org/cgi-bin/bugreport.cgi?bug=562544>
   def uninstall
     if @resource[:virtualenv]
-      env = "--environment=#{@resource[:virtualenv]}"
+      venv = "--environment=#{@resource[:virtualenv]}"
     else
-      env = ""
+      venv = ""
     end
     
-    lazy_pip "uninstall", "-y", "-q", env, @resource[:name]
+    lazy_pip "uninstall", "-y", "-q", venv, @resource[:name]
   end
 
   def update
