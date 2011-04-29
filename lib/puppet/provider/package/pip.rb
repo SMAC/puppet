@@ -62,7 +62,7 @@ Puppet::Type.type(:package).provide :pip,
     args = %w{install -q}
     
     if @resource[:virtualenv]
-      args << "--environment" << @resource[:virtualenv]
+      args << "--environment='#{@resource[:virtualenv]}'"
     end
     
     if @resource[:source]
