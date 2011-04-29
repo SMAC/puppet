@@ -24,9 +24,15 @@ Puppet::Type.type(:package).provide :pip,
   # Return an array of structured information about every installed package
   # that's managed by `pip` or an empty array if `pip` is not available.
   def self.instances
+    if @resource[:virtualenv]
+      env = "--environment=#{@resource[:virtualenv]}"
+    else
+      env = ""
+    end
+    
     packages = []
     pip_cmd = which('pip') or return []
-    execpipe "#{pip_cmd} freeze" do |process|
+    execpipe "#{pip_cmd} freeze #{env}" do |process|
       process.collect do |line|
         next unless options = parse(line)
         packages << new(options)
@@ -59,10 +65,10 @@ Puppet::Type.type(:package).provide :pip,
   # parameter, an SCM revision.  In that case, the source parameter
   # gives the fully-qualified URL to the repository.
   def install
-    args = %w{install -q}
+    args = %w{install -v}
     
     if @resource[:virtualenv]
-      args << "--environment='#{@resource[:virtualenv]}'"
+      args << "--environment=#{@resource[:virtualenv]}"
     end
     
     if @resource[:source]
@@ -90,7 +96,13 @@ Puppet::Type.type(:package).provide :pip,
   # unless this issue gets fixed.
   # <http://bugs.debian.org/cgi-bin/bugreport.cgi?bug=562544>
   def uninstall
-    lazy_pip "uninstall", "-y", "-q", @resource[:name]
+    if @resource[:virtualenv]
+      env = "--environment=#{@resource[:virtualenv]}"
+    else
+      env = ""
+    end
+    
+    lazy_pip "uninstall", "-y", "-q", env, @resource[:name]
   end
 
   def update
