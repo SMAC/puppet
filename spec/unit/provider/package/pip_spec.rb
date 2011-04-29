@@ -129,7 +129,7 @@ describe provider_class do
         with("install", "-q", "--upgrade", "sdsfdssdhdfyjymdgfcjdfjxdrssf")
       @provider.install
     end
-    
+
     it "should install into a virtualenv" do
       @resource[:ensure] = :installed
       @resource[:source] = nil
