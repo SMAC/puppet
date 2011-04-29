@@ -129,6 +129,15 @@ describe provider_class do
         with("install", "-q", "--upgrade", "sdsfdssdhdfyjymdgfcjdfjxdrssf")
       @provider.install
     end
+    
+    #it "should install into a virtualenv" do
+    #  @resource[:ensure] = :installed
+    #  @resource[:source] = nil
+    #  @resource[:virtualenv] = "/path/to/virtualenv"
+    #  @provider.expects(:lazy_pip).
+    #    with("install", "--environment='/path/to/virtualenv'", '-q', "sdsfdssdhdfyjymdgfcjdfjxdrssf")
+    #  @provider.install
+    #end
 
   end
 
